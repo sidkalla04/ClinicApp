@@ -13,7 +13,7 @@ const TYPES_OF_PAIN = [
 
 const STIFFNESS_OPTIONS = ['Morning', 'Evening', 'Night', 'Whole Day'];
 
-const TRAVELING_OPTIONS = ['2 Wheeler', '4 Wheeler', 'Local Transport'];
+const TRAVELING_OPTIONS = ['2 Wheeler', '4 Wheeler', 'Local Transport', 'Walking'];
 
 const HABITS = ['Smoking', 'Alcohol', 'Tobacco', 'Others'];
 
@@ -24,7 +24,6 @@ const PAIN_AREAS_LIST = [
   { key: 'Vertigo', label: 'Vertigo', sides: false },
   { key: 'Face', label: 'Face', sides: true },
   { key: 'Neck', label: 'Neck', sides: true },
-  { key: 'Midback', label: 'Mid back', sides: false },
   { key: 'Scapula', label: 'Scapula', sides: true },
   { key: 'Shoulder', label: 'Shoulder', sides: true },
   { key: 'Arm', label: 'Arm', sides: true },
@@ -40,6 +39,7 @@ const PAIN_AREAS_LIST = [
   // Torso & Lower Body
   { key: 'Chest', label: 'Chest', sides: false },
   { key: 'Abdomen', label: 'Abdomen', sides: false },
+  { key: 'Midback', label: 'Mid back', sides: false },
   { key: 'BackLower', label: 'Back Lower', sides: false },
   { key: 'Coccyx', label: 'Coccyx', sides: false },
   { key: 'Sacroiliac', label: 'Sacroiliac', sides: true },
@@ -109,12 +109,30 @@ const ConsultationForm = ({ initialData, onSubmit, isEdit = false, onCancel }) =
     }
   }, [initialData]);
 
+  const calculateAge = (dobString) => {
+    if (!dobString) return '';
+    const today = new Date();
+    const birthDate = new Date(dobString);
+    let calculatedAge = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      calculatedAge--;
+    }
+    return calculatedAge >= 0 ? calculatedAge.toString() : '';
+  };
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
+    setFormData((prev) => {
+      const updated = {
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value,
+      };
+      if (name === 'dob' && value) {
+        updated.age = calculateAge(value);
+      }
+      return updated;
+    });
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: null }));
     }
@@ -165,7 +183,13 @@ const ConsultationForm = ({ initialData, onSubmit, isEdit = false, onCancel }) =
   const validate = () => {
     const tempErrors = {};
     if (!formData.name.trim()) tempErrors.name = 'Patient name is required';
-    if (!formData.contactNo.trim()) tempErrors.contactNo = 'Contact number is required';
+    
+    const contactTrimmed = formData.contactNo.trim();
+    if (!contactTrimmed) {
+      tempErrors.contactNo = 'Contact number is required';
+    } else if (!/^\+?([0-9]{2})?[-. ]?([6-9][0-9]{9})$/.test(contactTrimmed)) {
+      tempErrors.contactNo = 'Please enter a valid 10-digit contact number';
+    }
     
     setErrors(tempErrors);
     return Object.keys(tempErrors).length === 0;
@@ -350,9 +374,11 @@ const ConsultationForm = ({ initialData, onSubmit, isEdit = false, onCancel }) =
             <div className="form-group">
               <label className="form-label">Old Radiographic Report (X-Ray/MRI/CT)</label>
               <select name="oldRadiographicReport" className="form-select" value={formData.oldRadiographicReport} onChange={handleChange}>
-                <option value="">Select</option>
-                <option value="Y">Yes (Y)</option>
-                <option value="N">No (N)</option>
+                <option value="">Select Report Type</option>
+                <option value="X-Ray">X-Ray</option>
+                <option value="MRI">MRI</option>
+                <option value="CT">CT</option>
+                <option value="N/A">N/A</option>
               </select>
             </div>
 
@@ -547,14 +573,12 @@ const ConsultationForm = ({ initialData, onSubmit, isEdit = false, onCancel }) =
           <div className="form-grid-3">
             <div className="form-group">
               <label className="form-label">Blood Pressure (BP)</label>
-              <input 
-                type="text" 
-                name="bp" 
-                className="form-input" 
-                value={formData.bp} 
-                onChange={handleChange}
-                placeholder="e.g. 120/80"
-              />
+              <select name="bp" className="form-select" value={formData.bp} onChange={handleChange}>
+                <option value="">Select BP Status</option>
+                <option value="Normal">Normal</option>
+                <option value="High">High</option>
+                <option value="Low">Low</option>
+              </select>
             </div>
 
             <div className="form-group">

@@ -225,7 +225,7 @@ const PatientDetailPage = () => {
                   </div>
                   <div className="detail-item">
                     <label>Old Radiographic Report</label>
-                    <span>{patient.oldRadiographicReport === 'Y' ? 'Yes (Y)' : patient.oldRadiographicReport === 'N' ? 'No (N)' : 'N/A'}</span>
+                    <span>{patient.oldRadiographicReport || 'N/A'}</span>
                   </div>
                   <div className="detail-item">
                     <label>Lab / Blood Test Report</label>
@@ -291,6 +291,14 @@ const PatientDetailPage = () => {
                   <div className="detail-item">
                     <label>Daily Travel Distance</label>
                     <span>{patient.dailyKm || 'N/A'}</span>
+                  </div>
+                  <div className="detail-item">
+                    <label>Blood Pressure (BP)</label>
+                    <span>{patient.bp || 'N/A'}</span>
+                  </div>
+                  <div className="detail-item">
+                    <label>Diabetes Status</label>
+                    <span>{patient.diabetes ? 'Yes (Diabetic)' : 'No (Non-Diabetic)'}</span>
                   </div>
                   <div className="detail-item" style={{ gridColumn: '1 / -1' }}>
                     <label>Pain Types</label>

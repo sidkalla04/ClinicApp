@@ -9,18 +9,19 @@ import toast from 'react-hot-toast';
 const PatientsPage = () => {
   const [patients, setPatients] = useState([]);
   const [search, setSearch] = useState('');
+  const [searchDate, setSearchDate] = useState('');
   const [loading, setLoading] = useState(true);
   const [deletePatientId, setDeletePatientId] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchPatients();
-  }, [search]);
+  }, [search, searchDate]);
 
   const fetchPatients = async () => {
     try {
       setLoading(true);
-      const res = await getPatientsApi({ search });
+      const res = await getPatientsApi({ search, date: searchDate });
       setPatients(res.data.patients || []);
     } catch (err) {
       toast.error('Failed to load patients list');
@@ -55,15 +56,37 @@ const PatientsPage = () => {
       <div className="page-body">
         {/* Actions header */}
         <div className="section-header">
-          <div className="search-bar" style={{ flex: 1, maxWidth: '400px' }}>
-            <FaSearch className="search-icon" />
-            <input 
-              type="text" 
-              className="form-input" 
-              placeholder="Search by name, contact, case no, diagnosis..." 
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+          <div style={{ display: 'flex', gap: '12px', flex: 1, maxWidth: '650px', alignItems: 'center' }}>
+            <div className="search-bar" style={{ flex: 1 }}>
+              <FaSearch className="search-icon" />
+              <input 
+                type="text" 
+                className="form-input" 
+                placeholder="Search by name, contact, case no, diagnosis..." 
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '13px', color: 'var(--gray-600)', whiteSpace: 'nowrap' }}>Date:</span>
+              <input 
+                type="date" 
+                className="form-input" 
+                style={{ width: '150px' }}
+                value={searchDate}
+                onChange={(e) => setSearchDate(e.target.value)}
+              />
+              {searchDate && (
+                <button 
+                  type="button"
+                  className="btn btn-secondary btn-sm" 
+                  style={{ padding: '6px 8px' }} 
+                  onClick={() => setSearchDate('')}
+                >
+                  Clear
+                </button>
+              )}
+            </div>
           </div>
 
           <Link to="/patients/new" className="btn btn-primary">

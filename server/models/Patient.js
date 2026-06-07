@@ -20,7 +20,7 @@ const patientSchema = new mongoose.Schema({
   // Clinical
   chiefComplaint: { type: String, trim: true },
   diagnosis: { type: String, trim: true },
-  oldRadiographicReport: { type: String, enum: ['Y', 'N', ''], default: '' },
+  oldRadiographicReport: { type: String, enum: ['X-Ray', 'MRI', 'CT', 'N/A', ''], default: '' },
   labBloodTestReport: { type: String, enum: ['Y', 'N', ''], default: '' },
 
   // Previous Treatment (array of selected options)
@@ -32,7 +32,7 @@ const patientSchema = new mongoose.Schema({
   // Pain Areas - each with body part and side
   painAreas: [{
     area: { type: String },
-    sides: [{ type: String, enum: ['R', 'L'] }]
+    sides: [{ type: String }]
   }],
 
   // Pain Characteristics
@@ -49,7 +49,7 @@ const patientSchema = new mongoose.Schema({
   sleep: { type: String, enum: ['Disturbed', 'Normal', ''], default: '' },
   traveling: [{
     type: String,
-    enum: ['2 Wheeler', '4 Wheeler', 'Local Transport']
+    enum: ['2 Wheeler', '4 Wheeler', 'Local Transport', 'Walking']
   }],
   dailyKm: { type: String, trim: true },
   habit: [{

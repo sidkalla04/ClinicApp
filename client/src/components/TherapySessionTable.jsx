@@ -3,6 +3,12 @@ import { FaPlus, FaEdit, FaTrash, FaCheck, FaTimes } from 'react-icons/fa';
 import { format } from 'date-fns';
 import ConfirmDialog from './ConfirmDialog';
 
+const TREATMENT_DAY_OPTIONS = [
+  'Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5',
+  'Day 6', 'Day 7', 'Day 8', 'Day 9', 'Day 10',
+  'Consultation', 'Follow Up'
+];
+
 const TherapySessionTable = ({ sessions, onAdd, onUpdate, onDelete }) => {
   const [editingId, setEditingId] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
@@ -14,8 +20,7 @@ const TherapySessionTable = ({ sessions, onAdd, onUpdate, onDelete }) => {
     physiotherapyTreatment: '',
     treatmentCost: '',
     paid: '',
-    ptSign: '',
-    day: format(new Date(), 'EEEE')
+    treatmentDay: 'Consultation'
   });
 
   const handleStartAdd = () => {
@@ -26,8 +31,7 @@ const TherapySessionTable = ({ sessions, onAdd, onUpdate, onDelete }) => {
       physiotherapyTreatment: '',
       treatmentCost: 0,
       paid: 0,
-      ptSign: '',
-      day: format(new Date(), 'EEEE')
+      treatmentDay: 'Consultation'
     });
   };
 
@@ -39,8 +43,7 @@ const TherapySessionTable = ({ sessions, onAdd, onUpdate, onDelete }) => {
       physiotherapyTreatment: session.physiotherapyTreatment || '',
       treatmentCost: session.treatmentCost || 0,
       paid: session.paid || 0,
-      ptSign: session.ptSign || '',
-      day: session.day || ''
+      treatmentDay: session.treatmentDay || 'Consultation'
     });
   };
 
@@ -51,17 +54,10 @@ const TherapySessionTable = ({ sessions, onAdd, onUpdate, onDelete }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormState((prev) => {
-      const newState = { ...prev, [name]: value };
-      if (name === 'date') {
-        try {
-          newState.day = format(new Date(value), 'EEEE');
-        } catch (e) {
-          newState.day = '';
-        }
-      }
-      return newState;
-    });
+    setFormState((prev) => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleSave = async (id) => {
@@ -113,8 +109,7 @@ const TherapySessionTable = ({ sessions, onAdd, onUpdate, onDelete }) => {
                 <th style={{ width: '100px' }}>Cost</th>
                 <th style={{ width: '100px' }}>Paid</th>
                 <th style={{ width: '100px' }}>Balance</th>
-                <th style={{ width: '120px' }}>Pt. Sign</th>
-                <th style={{ width: '120px' }}>Day</th>
+                <th style={{ width: '150px' }}>Treatment Day</th>
                 <th style={{ width: '100px', textAlign: 'center' }}>Actions</th>
               </tr>
             </thead>
@@ -159,24 +154,20 @@ const TherapySessionTable = ({ sessions, onAdd, onUpdate, onDelete }) => {
                     />
                   </td>
                   <td className={(Number(formState.treatmentCost) - Number(formState.paid) > 0) ? 'balance-positive' : 'balance-zero'}>
-                    {(Number(formState.treatmentCost) || 0) - (Number(formState.paid) || 0)}
+                    ₹{(Number(formState.treatmentCost) || 0) - (Number(formState.paid) || 0)}
                   </td>
                   <td>
-                    <input 
-                      type="text" 
-                      name="ptSign" 
-                      placeholder="Initial/Name" 
-                      value={formState.ptSign} 
-                      onChange={handleInputChange} 
-                    />
-                  </td>
-                  <td>
-                    <input 
-                      type="text" 
-                      name="day" 
-                      readOnly 
-                      value={formState.day} 
-                    />
+                    <select 
+                      name="treatmentDay" 
+                      value={formState.treatmentDay} 
+                      onChange={handleInputChange}
+                      className="form-select"
+                      style={{ padding: '4px 8px', fontSize: '13px' }}
+                    >
+                      {TREATMENT_DAY_OPTIONS.map(opt => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
+                    </select>
                   </td>
                   <td style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
                     <button className="btn btn-primary btn-sm btn-ghost" style={{ color: 'var(--green)' }} onClick={() => handleSave(null)}>
@@ -192,7 +183,7 @@ const TherapySessionTable = ({ sessions, onAdd, onUpdate, onDelete }) => {
               {/* Sessions List */}
               {sessions.length === 0 && !isAdding ? (
                 <tr>
-                  <td colSpan="9" style={{ textAlign: 'center', padding: '24px', color: 'var(--gray-400)' }}>
+                  <td colSpan="8" style={{ textAlign: 'center', padding: '24px', color: 'var(--gray-400)' }}>
                     No therapy sessions logged yet for this patient. Click "Add Session" above to log today's treatment.
                   </td>
                 </tr>
@@ -239,7 +230,7 @@ const TherapySessionTable = ({ sessions, onAdd, onUpdate, onDelete }) => {
                             onChange={handleInputChange} 
                           />
                         ) : (
-                          `$${session.treatmentCost || 0}`
+                          `₹${session.treatmentCost || 0}`
                         )}
                       </td>
                       <td>
@@ -251,34 +242,27 @@ const TherapySessionTable = ({ sessions, onAdd, onUpdate, onDelete }) => {
                             onChange={handleInputChange} 
                           />
                         ) : (
-                          `$${session.paid || 0}`
+                          `₹${session.paid || 0}`
                         )}
                       </td>
                       <td className={balance > 0 ? 'balance-positive' : 'balance-zero'}>
-                        {balance > 0 ? `$${balance}` : 'Settled'}
+                        {balance > 0 ? `₹${balance}` : 'Settled'}
                       </td>
                       <td>
                         {isEditing ? (
-                          <input 
-                            type="text" 
-                            name="ptSign" 
-                            value={formState.ptSign} 
-                            onChange={handleInputChange} 
-                          />
+                          <select 
+                            name="treatmentDay" 
+                            value={formState.treatmentDay} 
+                            onChange={handleInputChange}
+                            className="form-select"
+                            style={{ padding: '4px 8px', fontSize: '13px' }}
+                          >
+                            {TREATMENT_DAY_OPTIONS.map(opt => (
+                              <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                          </select>
                         ) : (
-                          session.ptSign || '-'
-                        )}
-                      </td>
-                      <td>
-                        {isEditing ? (
-                          <input 
-                            type="text" 
-                            name="day" 
-                            readOnly 
-                            value={formState.day} 
-                          />
-                        ) : (
-                          session.day || format(new Date(session.date), 'EEEE')
+                          session.treatmentDay || '-'
                         )}
                       </td>
                       <td style={{ textAlign: 'center' }}>

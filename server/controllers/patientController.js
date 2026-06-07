@@ -5,10 +5,12 @@ const TherapySession = require('../models/TherapySession');
 // @route   GET /api/patients
 const getPatients = async (req, res) => {
   try {
-    const { search, page = 1, limit = 20 } = req.query;
+    const { search, date, page = 1, limit = 20 } = req.query;
     let query = {};
+    const conditions = [];
+
     if (search) {
-      query = {
+      conditions.push({
         $or: [
           { name: { $regex: search, $options: 'i' } },
           { contactNo: { $regex: search, $options: 'i' } },
@@ -16,8 +18,36 @@ const getPatients = async (req, res) => {
           { diagnosis: { $regex: search, $options: 'i' } },
           { chiefComplaint: { $regex: search, $options: 'i' } },
         ],
-      };
+      });
     }
+
+    if (date) {
+      const startOfDay = new Date(`${date}T00:00:00.000Z`);
+      const endOfDay = new Date(`${date}T23:59:59.999Z`);
+      if (!isNaN(startOfDay.getTime())) {
+        conditions.push({
+          $or: [
+            {
+              dateOfExamination: {
+                $gte: startOfDay,
+                $lte: endOfDay
+              }
+            },
+            {
+              createdAt: {
+                $gte: startOfDay,
+                $lte: endOfDay
+              }
+            }
+          ]
+        });
+      }
+    }
+
+    if (conditions.length > 0) {
+      query = conditions.length === 1 ? conditions[0] : { $and: conditions };
+    }
+
     const total = await Patient.countDocuments(query);
     const patients = await Patient.find(query)
       .sort({ createdAt: -1 })

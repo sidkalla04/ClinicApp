@@ -8,8 +8,7 @@ const therapySessionSchema = new mongoose.Schema({
   treatmentCost: { type: Number, default: 0 },
   paid: { type: Number, default: 0 },
   balance: { type: Number, default: 0 },
-  ptSign: { type: String, trim: true },
-  day: { type: String, trim: true },
+  treatmentDay: { type: String, trim: true },
 }, { timestamps: true });
 
 // Auto-calculate balance before save
