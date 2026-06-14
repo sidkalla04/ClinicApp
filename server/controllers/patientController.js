@@ -5,7 +5,7 @@ const TherapySession = require('../models/TherapySession');
 // @route   GET /api/patients
 const getPatients = async (req, res) => {
   try {
-    const { search, date, page = 1, limit = 20 } = req.query;
+    const { search, date, page = 1, limit = 1000 } = req.query;
     let query = {};
     const conditions = [];
 
